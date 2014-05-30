@@ -1,7 +1,7 @@
 {
     "components": [{
         "class": "image",
-        "uri": "images/map.png"
+        "uri": "images/man.png"
     }],
     "children": [
 
