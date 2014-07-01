@@ -42,7 +42,7 @@ import es.eucm.ead.editor.model.Model;
 import es.eucm.ead.schema.editor.components.GameData;
 import es.eucm.ead.schema.editor.components.EditState;
 import es.eucm.ead.schema.entities.ModelEntity;
-import es.eucm.ead.schemax.entities.ModelEntityCategory;
+import es.eucm.ead.schemax.entities.ResourceCategory;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -61,38 +61,37 @@ public class DeleteSceneTest extends ActionTest {
 
 	@Test
 	public void testDeleteScene() {
-		Map<String, ModelEntity> scenes = mockModel
-				.getEntities(ModelEntityCategory.SCENE);
+		Map<String, Object> scenes = model.getResources(ResourceCategory.SCENE);
 
 		scenes.clear();
 		scenes.put("initial", new ModelEntity());
 
 		// Not delete: only one scene in the game
-		mockController.action(DeleteScene.class, "initial", false);
+		controller.action(DeleteScene.class, "initial", false);
 		assertEquals(scenes.size(), 1);
 
 		scenes.put("second", new ModelEntity());
-		mockController.action(DeleteScene.class, "second", false);
+		controller.action(DeleteScene.class, "second", false);
 		assertEquals(scenes.size(), 1);
 
 		// Assure the initial scene changes to another scene when it is removed
 		scenes.put("newInitial", new ModelEntity());
-		Model.getComponent(mockModel.getGame(), EditState.class).setEditScene(
+		Model.getComponent(model.getGame(), EditState.class).setEditScene(
 				"initial");
-		Model.getComponent(mockModel.getGame(), GameData.class)
-				.setInitialScene("initial");
-		mockController.action(DeleteScene.class, "initial", false);
+		Model.getComponent(model.getGame(), GameData.class).setInitialScene(
+				"initial");
+		controller.action(DeleteScene.class, "initial", false);
 		assertEquals("newInitial",
-				Model.getComponent(mockModel.getGame(), GameData.class)
+				Model.getComponent(model.getGame(), GameData.class)
 						.getInitialScene());
 		assertEquals("newInitial",
-				Model.getComponent(mockModel.getGame(), EditState.class)
+				Model.getComponent(model.getGame(), EditState.class)
 						.getEditScene());
 	}
 
 	@Test
 	public void testDeleteUnknownScene() {
 		// Assure nothing bad happens removing an non-existing scene
-		mockController.action(DeleteScene.class, "ñor", false);
+		controller.action(DeleteScene.class, "ñor", false);
 	}
 }

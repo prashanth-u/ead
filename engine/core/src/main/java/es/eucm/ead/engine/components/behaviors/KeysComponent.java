@@ -34,62 +34,21 @@
  *      You should have received a copy of the GNU Lesser General Public License
  *      along with eAdventure.  If not, see <http://www.gnu.org/licenses/>.
  */
-package es.eucm.ead.editor.model.events;
 
-import es.eucm.ead.editor.model.Model;
-import es.eucm.ead.schema.entities.ModelEntity;
-import es.eucm.ead.schemax.entities.ModelEntityCategory;
+package es.eucm.ead.engine.components.behaviors;
+
+import es.eucm.ead.engine.components.behaviors.events.RuntimeKey;
+import es.eucm.ead.schema.components.behaviors.events.Key;
 
 /**
- * A {@link ModelEntity} has been added/removed from the {@link Model}
+ * Component holding all effects that are executed when the owner entity
+ * receives a key interaction
  */
-public class RootEntityEvent implements ModelEvent {
 
-	public enum Type {
-		ADDED, REMOVED;
+public class KeysComponent extends BehaviorComponent<Key, RuntimeKey> {
+
+	public Class<RuntimeKey> getRuntimeBehaviorClass() {
+		return RuntimeKey.class;
 	}
 
-	private Type type;
-
-	private Model model;
-
-	private String id;
-
-	private ModelEntity modelEntity;
-
-	private ModelEntityCategory category;
-
-	public RootEntityEvent(Type type, Model model, String id,
-			ModelEntity modelEntity, ModelEntityCategory category) {
-		this.type = type;
-		this.model = model;
-		this.id = id;
-		this.modelEntity = modelEntity;
-		this.category = category;
-	}
-
-	public Type getType() {
-		return type;
-	}
-
-	public Model getModel() {
-		return model;
-	}
-
-	public String getId() {
-		return id;
-	}
-
-	public ModelEntity getModelEntity() {
-		return modelEntity;
-	}
-
-	public ModelEntityCategory getCategory() {
-		return category;
-	}
-
-	@Override
-	public Model getTarget() {
-		return model;
-	}
 }

@@ -42,6 +42,7 @@ import es.eucm.ead.engine.assets.GameAssets;
 import es.eucm.ead.engine.components.I18nTextComponent;
 import es.eucm.ead.engine.processors.CamerasProcessor;
 import es.eucm.ead.engine.processors.PathProcessor;
+import es.eucm.ead.engine.processors.RefProcessor;
 import es.eucm.ead.engine.processors.TagsProcessor;
 import es.eucm.ead.engine.processors.VisibilityProcessor;
 import es.eucm.ead.engine.processors.behaviors.BehaviorsProcessor;
@@ -57,11 +58,13 @@ import es.eucm.ead.engine.processors.renderers.ShapeRendererProcessor;
 import es.eucm.ead.engine.processors.renderers.StatesProcessor;
 import es.eucm.ead.engine.processors.tweens.TweensProcessor;
 import es.eucm.ead.engine.systems.EffectsSystem;
+import es.eucm.ead.engine.systems.KeyPressedSystem;
 import es.eucm.ead.engine.systems.PathSystem;
 import es.eucm.ead.engine.systems.RemoveEntitiesSystem;
 import es.eucm.ead.engine.systems.TouchedSystem;
 import es.eucm.ead.engine.systems.VelocitySystem;
 import es.eucm.ead.engine.systems.VisibilitySystem;
+import es.eucm.ead.engine.systems.behaviors.KeyBehaviorSystem;
 import es.eucm.ead.engine.systems.behaviors.TimersSystem;
 import es.eucm.ead.engine.systems.behaviors.TouchBehaviorSystem;
 import es.eucm.ead.engine.systems.effects.AddAnimationExecutor;
@@ -81,11 +84,6 @@ import es.eucm.ead.engine.systems.effects.controlstructures.IfExecutor;
 import es.eucm.ead.engine.systems.effects.controlstructures.IfThenElseIfExecutor;
 import es.eucm.ead.engine.systems.effects.controlstructures.RepeatExecutor;
 import es.eucm.ead.engine.systems.effects.controlstructures.ScriptCallExecutor;
-import es.eucm.ead.engine.systems.effects.controlstructures.IfExecutor;
-import es.eucm.ead.engine.systems.effects.controlstructures.IfThenElseIfExecutor;
-import es.eucm.ead.engine.systems.effects.controlstructures.RepeatExecutor;
-import es.eucm.ead.engine.systems.effects.controlstructures.ScriptCallExecutor;
-import es.eucm.ead.engine.systems.effects.controlstructures.WhileExecutor;
 import es.eucm.ead.engine.systems.effects.controlstructures.WhileExecutor;
 import es.eucm.ead.engine.systems.tweens.TweenSystem;
 import es.eucm.ead.engine.systems.tweens.tweencreators.AlphaTweenCreator;
@@ -97,6 +95,7 @@ import es.eucm.ead.engine.systems.tweens.tweencreators.TimelineCreator;
 import es.eucm.ead.engine.variables.VariablesManager;
 import es.eucm.ead.engine.variables.VarsContext;
 import es.eucm.ead.schema.components.PathBoundary;
+import es.eucm.ead.schema.components.RefComponent;
 import es.eucm.ead.schema.components.Tags;
 import es.eucm.ead.schema.components.Visibility;
 import es.eucm.ead.schema.components.behaviors.Behavior;
@@ -106,6 +105,7 @@ import es.eucm.ead.schema.components.controls.ImageButton;
 import es.eucm.ead.schema.components.controls.Label;
 import es.eucm.ead.schema.components.controls.TextButton;
 import es.eucm.ead.schema.components.physics.Velocity;
+import es.eucm.ead.schema.components.renderers.RefRenderer;
 import es.eucm.ead.schema.components.tweens.AlphaTween;
 import es.eucm.ead.schema.components.tweens.FieldTween;
 import es.eucm.ead.schema.components.tweens.MoveTween;
@@ -125,18 +125,6 @@ import es.eucm.ead.schema.effects.RemoveEntity;
 import es.eucm.ead.schema.effects.SetCamera;
 import es.eucm.ead.schema.effects.SetViewport;
 import es.eucm.ead.schema.effects.controlstructures.ForEach;
-import es.eucm.ead.schema.effects.AddAnimation;
-import es.eucm.ead.schema.effects.AddComponent;
-import es.eucm.ead.schema.effects.AddEntity;
-import es.eucm.ead.schema.effects.ChangeEntityProperty;
-import es.eucm.ead.schema.effects.ChangeVar;
-import es.eucm.ead.schema.effects.EndGame;
-import es.eucm.ead.schema.effects.GoScene;
-import es.eucm.ead.schema.effects.GoTo;
-import es.eucm.ead.schema.effects.RemoveComponent;
-import es.eucm.ead.schema.effects.RemoveEntity;
-import es.eucm.ead.schema.effects.SetCamera;
-import es.eucm.ead.schema.effects.SetViewport;
 import es.eucm.ead.schema.effects.controlstructures.If;
 import es.eucm.ead.schema.effects.controlstructures.IfThenElseIf;
 import es.eucm.ead.schema.effects.controlstructures.Repeat;
@@ -174,12 +162,14 @@ public class DefaultEngineInitializer implements EngineInitializer {
 
 		gameLoop.addSystem(new TouchBehaviorSystem(gameLoop, variablesManager));
 		gameLoop.addSystem(new TimersSystem(gameLoop, variablesManager));
+		gameLoop.addSystem(new KeyBehaviorSystem(gameLoop, variablesManager));
 		gameLoop.addSystem(new VelocitySystem());
 		gameLoop.addSystem(tweenSystem);
 		gameLoop.addSystem(new VisibilitySystem(gameLoop, variablesManager));
 		gameLoop.addSystem(new PathSystem());
 		gameLoop.addSystem(new RemoveEntitiesSystem(gameLoop, variablesManager));
 		gameLoop.addSystem(new TouchedSystem());
+		gameLoop.addSystem(new KeyPressedSystem());
 
 		// Register effects
 		EffectsSystem effectsSystem = new EffectsSystem(gameLoop,
@@ -270,6 +260,7 @@ public class DefaultEngineInitializer implements EngineInitializer {
 				new LabelProcessor(gameLoop, gameAssets, variablesManager));
 		componentLoader.registerComponentProcessor(Behavior.class,
 				new BehaviorsProcessor(gameLoop));
+
 		componentLoader.registerComponentProcessor(States.class,
 				new StatesProcessor(gameLoop, gameAssets, componentLoader));
 
@@ -293,6 +284,12 @@ public class DefaultEngineInitializer implements EngineInitializer {
 				new PathProcessor(gameLoop));
 		componentLoader.registerComponentProcessor(Cameras.class,
 				new CamerasProcessor(gameLoop));
+		componentLoader.registerComponentProcessor(RefComponent.class,
+				new RefProcessor<RefComponent>(gameLoop, gameAssets,
+						componentLoader));
+		componentLoader.registerComponentProcessor(RefRenderer.class,
+				new RefProcessor<RefRenderer>(gameLoop, gameAssets,
+						componentLoader));
 	}
 
 	private static class LanguageVariableListener implements
